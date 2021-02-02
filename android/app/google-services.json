@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "537938306992",
+    "project_id": "anthony-bookings",
+    "storage_bucket": "anthony-bookings.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537938306992:android:36fd0a1b68c54d55105875",
+        "android_client_info": {
+          "package_name": "com.crossland.anthonybookings"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "537938306992-42pnhld57upnqo4pb9qo2e5rofcl1i4e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQBRBqvqJmA1FDLcB0EUs6sNwth5Es7zg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "537938306992-42pnhld57upnqo4pb9qo2e5rofcl1i4e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
