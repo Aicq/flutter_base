@@ -1,6 +1,7 @@
 import 'package:anthonybookings/models/booking_user.dart';
 import 'package:anthonybookings/services/auth.dart';
 import 'package:anthonybookings/services/database.dart';
+import 'package:anthonybookings/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -102,7 +103,7 @@ class _HomeState extends State<Home> {
               ) : Text('Nothing for user yet')
             );
           } else {
-            return Text('no data');
+            return Loading();
           }
         },
     );
