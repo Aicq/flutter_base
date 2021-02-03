@@ -1,5 +1,5 @@
 import 'package:anthonybookings/models/booking_user.dart';
-import 'package:anthonybookings/services/database.dart';
+import 'package:anthonybookings/services/user.service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
@@ -57,7 +57,7 @@ class AuthService {
 
         print('User: ${user.firstName}');
 
-        await DatabaseService(uid: user.uid).updateUserData(user);
+        await UserService(uid: user.uid).updateUserData(user);
         return user;
       } catch(e) {
         print(e.toString());

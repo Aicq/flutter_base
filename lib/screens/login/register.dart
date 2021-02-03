@@ -19,10 +19,6 @@ class _RegisterState extends State<Register> {
   bool isLoading = false;
 
   // text field states
-  String email = '';
-  String firstName = '';
-  String lastName = '';
-  String password = '';
   String error = '';
 
   BookingUser newUser = new BookingUser();

@@ -1,10 +1,12 @@
+import 'package:anthonybookings/models/booking.dart';
 import 'package:anthonybookings/models/booking_user.dart';
+import 'package:anthonybookings/screens/home/admin_provider.dart';
+import 'package:anthonybookings/screens/home/user_customer.dart';
 import 'package:anthonybookings/services/auth.dart';
-import 'package:anthonybookings/services/database.dart';
+import 'package:anthonybookings/services/user.service.dart';
 import 'package:anthonybookings/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
 
@@ -15,21 +17,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final AuthService _auth = AuthService();
 
-  final List<String> messages = const [
-    'Message 1',
-    'Message 2',
-    'Message 3',
-    'Message 4',
-  ];
-
-  DateTime selectedDate = DateTime.now();
-
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<BookingUser>(context);
 
     return StreamBuilder<BookingUser>(
-        stream: DatabaseService(uid: user.uid).userData,
+        stream: UserService(uid: user.uid).userData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
 
@@ -48,59 +41,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              body: user.isAdmin > 0 ? Container(
-//                decoration: BoxDecoration(
-//                  color: Colors.lightGreen[100]
-//                ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          'Welcome ${user.firstName}!',
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      CalendarDatePicker(
-                        initialDate: selectedDate,
-                        firstDate: DateTime(2010),
-                        lastDate: DateTime(2100),
-                        onDateChanged: (date) {
-                          setState(() {
-                            selectedDate = date;
-                          });
-                        }
-                      ),
-                      ListTile(
-                        title: Text('Appointments Scheduled'),
-                        trailing: Text('${DateFormat('dd / MM / yy').format(selectedDate)}'),
-                        tileColor: Colors.lightGreen[200],
-                      ),
-                      Expanded(
-                        child: ListView.separated(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: messages.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                                leading: CircleAvatar(),
-                                subtitle: Text('Another Text'),
-                                title: Text('${messages[index]}')
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) {
-                            return Divider();
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ) : Text('Nothing for user yet')
+              body: user.isAdmin > 0 ? AdminProvider(user: user) : UserCustomer(user: user)
             );
           } else {
             return Loading();
