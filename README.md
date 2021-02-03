@@ -2,6 +2,10 @@
 
 Generic bookings/appointments app
 
+master branch is the base app to be used as a boilerplate/template for future apps
+
+generic_bookings branch is for the main bookings app
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
