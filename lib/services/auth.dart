@@ -4,7 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Default
+   final FirebaseAuth auth = FirebaseAuth.instance;
+  // For running unit test
+  //  FirebaseAuth auth;
+  //  AuthService({this.auth});
 
   // create brewuser obj based on Firebase user
   BookingUser _userFromFirebaseUser(User user) {
@@ -13,13 +17,13 @@ class AuthService {
 
   // auth change user stream
   Stream<BookingUser> get user {
-    return _auth.authStateChanges().map(_userFromFirebaseUser);
+    return auth.authStateChanges().map(_userFromFirebaseUser);
   }
 
   // sign in anon
 //  Future signInAnon() async {
 //    try {
-//      UserCredential result = await _auth.signInAnonymously();
+//      UserCredential result = await auth.signInAnonymously();
 //      // Firebase user
 //      User user = result.user;
 //      return _userFromFirebaseUser(user);
@@ -32,9 +36,10 @@ class AuthService {
   // sign in with email/password
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await auth.signInWithEmailAndPassword(email: email, password: password);
       // Firebase user id
-      return result.user.uid;
+//      return result.user.uid;
+      return true;
     } catch(e) {
       print(e.toString());
       return null;
@@ -44,7 +49,7 @@ class AuthService {
   // register with email/password
   Future registerWithEmailAndPassword(BookingUser newUser) async {
       try {
-        UserCredential result = await _auth.createUserWithEmailAndPassword(email: newUser.email, password: newUser.password);
+        UserCredential result = await auth.createUserWithEmailAndPassword(email: newUser.email, password: newUser.password);
         // Booking user - extract uid from firebase user result
         BookingUser user = BookingUser(
             uid: result.user.uid,
@@ -58,7 +63,7 @@ class AuthService {
         print('User: ${user.firstName}');
 
         await UserService(uid: user.uid).updateUserData(user);
-        return user;
+        return true;
       } catch(e) {
         print(e.toString());
         return null;
@@ -68,7 +73,8 @@ class AuthService {
   // sign out
   Future signOut() async {
     try {
-      return await _auth.signOut();
+      await auth.signOut();
+      return true;
     } catch(e) {
       print(e.toString());
       return null;

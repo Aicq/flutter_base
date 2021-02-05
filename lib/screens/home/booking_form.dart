@@ -10,17 +10,20 @@ import 'package:intl/intl.dart';
 class BookingForm extends StatefulWidget {
 
   final BookingUser user;
-  BookingForm({this.user});
+  final Function fetchUserBookings;
+  BookingForm({this.user, this.fetchUserBookings});
 
   @override
   _BookingFormState createState() => _BookingFormState();
 }
 
 class _BookingFormState extends State<BookingForm> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKeyPage1 = GlobalKey<FormState>();
+  final _formKeyPage2 = GlobalKey<FormState>();
   final controller = PageController(
     initialPage: 0,
   );
+  final Curve pageScrollCurve = Curves.linear;
 
   bool isLoading = false;
   DateTime selectedDate = DateTime.now();
@@ -66,6 +69,7 @@ class _BookingFormState extends State<BookingForm> {
   void initState() {
     providerListFuture = getProviders();
     newBooking = Booking(customerId: widget.user.uid);
+    updateAvailableTimes();
     super.initState();
   }
 
@@ -78,92 +82,102 @@ class _BookingFormState extends State<BookingForm> {
       ),
       body: PageView(
         controller: controller,
+        physics: new NeverScrollableScrollPhysics(), // Disable scrolling
         children: [
-
           Container(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: FutureBuilder(
-                    future: providerListFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        return DropdownButtonFormField(
-                          hint: Text('Select a doctor'),
-                          value: selectedProvider,
-                          items: snapshot.data.map<DropdownMenuItem<BookingUser>>((BookingUser user) {
-                            return DropdownMenuItem(
-                              value: user,
-                              child: Text('${user.firstName} ${user.lastName}'),
-                            );
-                          }).toList(),
-                          onChanged: (newVal) {
+            child: Form(
+              key: _formKeyPage1,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FutureBuilder(
+                      future: providerListFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return DropdownButtonFormField(
+                            key: ValueKey('providerDropdown'),
+                            hint: Text('Select a doctor'),
+                            value: selectedProvider,
+                            validator: (value) {
+                              return value == null ? 'Select a doctor!' : null;
+                            },
+                            items: snapshot.data.map<DropdownMenuItem<BookingUser>>((BookingUser user) {
+                              return DropdownMenuItem(
+                                value: user,
+                                child: Text('${user.firstName} ${user.lastName}'),
+                              );
+                            }).toList(),
+                            onChanged: (newVal) {
+                              setState(() {
+                                selectedProvider = newVal;
+                                newBooking.providerId = selectedProvider.uid;
+                              });
+                            },
+                          );
+                        }
+                        return CircularProgressIndicator();
+                      },
+                    ),
+                  ),
+                  CalendarDatePicker(
+                      initialDate: selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(Duration(days: 1000)),
+                      onDateChanged: (date) {
+                        setState(() {
+                          selectedDate = date;
+                          updateAvailableTimes();
+//                        newBooking.dateTime = date;
+                        });
+                      }
+                  ),
+                  ListTile(
+                    title: Text('Available Bookings - ${DateFormat('dd / MM / yy').format(selectedDate)}'),
+                    tileColor: Colors.lightGreen[200],
+                  ),
+                  isTimeListLoading ? Padding(
+                    padding: const EdgeInsets.only(top: 40.0),
+                    child: SpinKitDualRing(color: Colors.deepPurple),
+                  ) : Expanded(
+                    child: ListView.separated(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: availableTimes.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text('${availableTimes[index].format(context)}'),
+                          onTap: () {
                             setState(() {
-                              selectedProvider = newVal;
-                              newBooking.providerId = selectedProvider.uid;
+                              if (_formKeyPage1.currentState.validate()) {
+                                selectedDate = new DateTime(
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                  availableTimes[index].hour,
+                                  availableTimes[index].minute,
+                                );
+                                newBooking.dateTime = selectedDate;
+                                controller.nextPage(duration: Duration(milliseconds: 500), curve: pageScrollCurve);
+                              }
                             });
                           },
                         );
-                      }
-                      return CircularProgressIndicator();
-                    },
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        return Divider();
+                      },
+                    ),
                   ),
-                ),
-                CalendarDatePicker(
-                    initialDate: selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 1000)),
-                    onDateChanged: (date) {
-                      setState(() {
-                        selectedDate = date;
-                        updateAvailableTimes();
-//                        newBooking.dateTime = date;
-                      });
-                    }
-                ),
-                ListTile(
-                  title: Text('Available Bookings - ${DateFormat('dd / MM / yy').format(selectedDate)}'),
-                  tileColor: Colors.lightGreen[200],
-                ),
-                isTimeListLoading ? Padding(
-                  padding: const EdgeInsets.only(top: 40.0),
-                  child: SpinKitDualRing(color: Colors.deepPurple),
-                ) : Expanded(
-                  child: ListView.separated(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: availableTimes.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        title: Text('${availableTimes[index].format(context)}'),
-                        onTap: () {
-                          setState(() {
-                            selectedDate = new DateTime(
-                              selectedDate.year,
-                              selectedDate.month,
-                              selectedDate.day,
-                              availableTimes[index].hour,
-                              availableTimes[index].minute,
-                            );
-                            newBooking.dateTime = selectedDate;
-                          });
-                        },
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return Divider();
-                    },
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           SingleChildScrollView(
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
               child: Form(
-                key: _formKey,
+                key: _formKeyPage2,
                 child: Column(
                   children: [
                     TextFormField(
@@ -171,6 +185,10 @@ class _BookingFormState extends State<BookingForm> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       minLines: 3,
+                      initialValue: 'Routine checkup',
+                      validator: (value) {
+                        return value.isEmpty ? 'Enter an description!' : null;
+                      },
                       onChanged: (value) {
                         setState(() {
                           newBooking.description = value;
@@ -204,28 +222,46 @@ class _BookingFormState extends State<BookingForm> {
                       ),
                     ),
                     SizedBox(height: 20.0),
-                    RaisedButton(
-                      child: Text(
-                        'Book Me In',
-                        style: TextStyle(
-                          color: Colors.white,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        RaisedButton(
+                          child: Text(
+                            'Back',
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                          color: Colors.deepPurple[100],
+                          onPressed: () {
+                            controller.previousPage(duration: Duration(milliseconds: 500), curve: pageScrollCurve);
+                          },
                         ),
-                      ),
-                      onPressed: () async {
-                        if (_formKey.currentState.validate()) {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          dynamic result = BookingService().addEditBooking(newBooking); // Send request to add new booking
-                          if (result == null) {
-                            setState(() {
-                              error = 'Error adding booking, please try again.';
-                              isLoading = false;
-                            });
-                          }
-                          Navigator.pop(context);
-                        }
-                      },
+                        RaisedButton(
+                          child: Text(
+                            'Book Me In',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          onPressed: () async {
+                            if (_formKeyPage2.currentState.validate()) {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              dynamic result = await BookingService().addEditBooking(newBooking); // Send request to add new booking
+                              if (result == null) {
+                                setState(() {
+                                  error = 'Error adding booking, please try again.';
+                                  isLoading = false;
+                                });
+                              }
+                              widget.fetchUserBookings(widget.user.uid);
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                      ],
                     ),
                     SizedBox(height: 12.0),
                     Text(

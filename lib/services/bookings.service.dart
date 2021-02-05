@@ -40,4 +40,10 @@ class BookingService {
     var response = await bookingCollection.where('dateTime', isGreaterThanOrEqualTo: _start).where('dateTime', isLessThanOrEqualTo: _end).get();
     return response.docs.map(_bookingDataFromSnapshot).toList().length > 0;
   }
+
+  Future<List<Booking>> getUserBookings(String userId) async {
+    // This query relies on an index created on firebase
+    var response = await bookingCollection.where('customerId', isEqualTo: userId).orderBy('dateTime').get();
+    return response.docs.map(_bookingDataFromSnapshot).toList();
+  }
 }

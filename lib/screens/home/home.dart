@@ -33,6 +33,7 @@ class _HomeState extends State<Home> {
                 title: Text('Bookings - ${user.isAdmin > 0 ? 'Admin' : 'User'}'),
                 actions: [
                   FlatButton.icon(
+                    key: ValueKey('signOutButton'),
                     icon: Icon(Icons.person),
                     label: Text('Logout'),
                     onPressed: () async {

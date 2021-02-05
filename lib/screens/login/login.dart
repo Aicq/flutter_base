@@ -47,6 +47,7 @@ class _RegisterState extends State<Login> {
               children: [
                 SizedBox(height: 20.0),
                 TextFormField(
+                  key: ValueKey('email'),
                   decoration: textInputDecoration.copyWith(hintText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -61,6 +62,7 @@ class _RegisterState extends State<Login> {
                 ),
                 SizedBox(height: 20.0),
                 TextFormField(
+                  key: ValueKey('password'),
                   decoration: textInputDecoration.copyWith(hintText: 'Password'),
                   obscureText: true,
                   validator: (value) {
@@ -74,6 +76,7 @@ class _RegisterState extends State<Login> {
                 ),
                 SizedBox(height: 20.0),
                 RaisedButton(
+                  key: ValueKey('loginButton'),
                   child: Text(
                     'Sign in',
                     style: TextStyle(
