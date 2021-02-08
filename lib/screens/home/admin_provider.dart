@@ -1,6 +1,9 @@
 import 'package:anthonybookings/models/booking.dart';
 import 'package:anthonybookings/models/booking_user.dart';
+import 'package:anthonybookings/services/bookings.service.dart';
+import 'package:anthonybookings/services/user.service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 class AdminProvider extends StatefulWidget {
@@ -14,15 +17,30 @@ class AdminProvider extends StatefulWidget {
 
 class _AdminProviderState extends State<AdminProvider> {
 
-  final List<Booking> bookings = [
-    Booking(customerId: '1234', providerId: 'VqSnxfJzW7VKqEfsAY95QUvBajX2', dateTime: DateTime.now(), description: 'A quick checkup1', additionalDetails: 'Allergic to panadol'),
-    Booking(customerId: '4567', providerId: 'VqSnxfJzW7VKqEfsAY95QUvBajX2', dateTime: DateTime.now(), description: 'A quick checkup2', additionalDetails: 'Allergic to panadol'),
-    Booking(customerId: '134641', providerId: 'VqSnxfJzW7VKqEfsAY95QUvBajX2', dateTime: DateTime.now(), description: 'A quick checkup3', additionalDetails: 'Allergic to panadol'),
-    Booking(customerId: '123451', providerId: 'VqSnxfJzW7VKqEfsAY95QUvBajX2', dateTime: DateTime.now(), description: 'A quick checkup4', additionalDetails: 'Allergic to panadol'),
-    Booking(customerId: '13451345', providerId: 'VqSnxfJzW7VKqEfsAY95QUvBajX2', dateTime: DateTime.now(), description: 'A quick checkup5', additionalDetails: 'Allergic to panadol'),
-  ];
-
+  List<Booking> bookings = [];
   DateTime selectedDate = DateTime.now();
+  bool isBookingsListLoading = false;
+
+  void fetchUserBookings(String userId, DateTime dateTime) async {
+    isBookingsListLoading = true;
+    List<Booking> newBookings = await BookingService().getProviderBookings(userId, dateTime);
+
+    setState(() {
+      bookings = newBookings;
+      isBookingsListLoading = false;
+    });
+  }
+
+
+  Future<BookingUser> getCustomerFromBooking(Booking booking) async {
+    return await UserService().singleUser(booking.customerId);
+  }
+
+  @override
+  void initState() {
+    fetchUserBookings(widget.user.uid, DateTime.now());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +68,7 @@ class _AdminProviderState extends State<AdminProvider> {
                 onDateChanged: (date) {
                   setState(() {
                     selectedDate = date;
+                    fetchUserBookings(widget.user.uid, selectedDate);
                   });
                 }
             ),
@@ -58,17 +77,44 @@ class _AdminProviderState extends State<AdminProvider> {
               trailing: Text('${DateFormat('dd / MM / yy').format(selectedDate)}'),
               tileColor: Colors.lightGreen[200],
             ),
-            Expanded(
-              child: ListView.separated(
+            isBookingsListLoading ? Padding(
+              padding: const EdgeInsets.only(top: 40.0),
+              child: SpinKitDualRing(color: Colors.deepPurple),
+            ) : Expanded(
+              child: bookings.length == 0 ? Padding(
+                padding: const EdgeInsets.only(top: 15.0),
+                child: Text('Nothing scheduled'),
+              ) : ListView.separated(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemCount: bookings.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    leading: CircleAvatar(), // Maybe put customer image here?
-                    subtitle: Text('${bookings[index].additionalDetails}'),
-                    title: Text('${bookings[index].description}'),
-                    trailing: Text('${DateFormat('kk:mm').format(bookings[index].dateTime)}'),
+                  return FutureBuilder(
+                    future: getCustomerFromBooking(bookings[index]),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                        return ListTile(
+                          // Maybe put customer image here?
+                          leading: CircleAvatar(
+                            backgroundImage: AssetImage('assets/default_user_pic.png'),
+                            radius: 25.0,
+                          ),
+                          subtitle: Text('Patient: ${snapshot.data.firstName}'),
+                          title: Text('${bookings[index].description}'),
+                          trailing: Text('${DateFormat('kk:mm').format(bookings[index].dateTime)}'),
+                        );
+                      }
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 15.0),
+                          child: SpinKitThreeBounce(
+                            color: Colors.blueGrey,
+                            size: 20.0,
+                          ),
+                        ),
+                      );
+                    },
+
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {

@@ -38,25 +38,32 @@ class _BookingFormState extends State<BookingForm> {
     return await UserService().fetchUsers('isAdmin', 1);
   }
 
+  // Updates the available appointments list based on the current date selected on the calender
   void updateAvailableTimes() async {
 
     List<TimeOfDay> newAvailableTimes = [];
     isTimeListLoading = true;
 
-    for (var timeValue in bookingIntervalTimes) {
-      bool exists = await BookingService().doesBookingExist(new DateTime(
+    List<Booking> bookingsOnDay = await BookingService().getBookingsOnDay(new DateTime(
         selectedDate.year,
         selectedDate.month,
-        selectedDate.day,
-        timeValue.hour,
-        timeValue.minute,
-      ));
+        selectedDate.day
+    ));
 
-      if (exists) {
-        continue;
+    for (var timeValue in bookingIntervalTimes) {
+      bool isAvailable = true;
+
+      for (var booking in bookingsOnDay) {
+        if (TimeOfDay.fromDateTime(booking.dateTime).hour == timeValue.hour
+            && TimeOfDay.fromDateTime(booking.dateTime).minute == timeValue.minute) {
+          isAvailable = false;
+          break;
+        }
       }
 
-      newAvailableTimes.add(timeValue);
+      if (isAvailable) {
+        newAvailableTimes.add(timeValue);
+      }
     }
 
     setState(() {
@@ -68,7 +75,7 @@ class _BookingFormState extends State<BookingForm> {
   @override
   void initState() {
     providerListFuture = getProviders();
-    newBooking = Booking(customerId: widget.user.uid);
+    newBooking = Booking(customerId: widget.user.uid, description: 'Routine checkup');
     updateAvailableTimes();
     super.initState();
   }
@@ -128,7 +135,6 @@ class _BookingFormState extends State<BookingForm> {
                         setState(() {
                           selectedDate = date;
                           updateAvailableTimes();
-//                        newBooking.dateTime = date;
                         });
                       }
                   ),
@@ -185,7 +191,7 @@ class _BookingFormState extends State<BookingForm> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       minLines: 3,
-                      initialValue: 'Routine checkup',
+                      initialValue: newBooking.description,
                       validator: (value) {
                         return value.isEmpty ? 'Enter an description!' : null;
                       },
@@ -255,6 +261,7 @@ class _BookingFormState extends State<BookingForm> {
                                   error = 'Error adding booking, please try again.';
                                   isLoading = false;
                                 });
+                                return;
                               }
                               widget.fetchUserBookings(widget.user.uid);
                               Navigator.pop(context);

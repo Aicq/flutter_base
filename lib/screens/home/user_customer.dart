@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
 import 'booking_form.dart';
+import 'details_panel.dart';
 
 class UserCustomer extends StatefulWidget {
 
@@ -44,6 +45,13 @@ class _UserCustomerState extends State<UserCustomer> {
 
   @override
   Widget build(BuildContext context) {
+
+    void _showDetailsPanel(Booking booking, BookingUser customer, BookingUser provider) {
+      showModalBottomSheet(context: context, builder: (context) {
+        return DetailsPanel(booking: booking, customer: customer, provider: provider, fetchUserBookings: fetchUserBookings);
+      });
+    }
+
     return Scaffold(
       body: Container(
 //                decoration: BoxDecoration(
@@ -110,11 +118,17 @@ class _UserCustomerState extends State<UserCustomer> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
                           return ListTile(
-//                          leading: CircleAvatar(), // Maybe put provider image here?
-                            leading: Text('Doctor:\n${snapshot.data.firstName}'),
-                            subtitle: Text('${bookings[index].additionalDetails ?? ''}'),
+                            // Maybe put provider image here?
+                            leading: CircleAvatar(
+                              backgroundImage: AssetImage('assets/default_user_pic.png'),
+                              radius: 25.0,
+                            ),
+                            subtitle: Text('Doctor: ${snapshot.data.firstName}'),
                             title: Text('${bookings[index].description}'),
                             trailing: Text('${DateFormat('dd/MM/yy').format(bookings[index].dateTime)}\n${DateFormat('kk:mm').format(bookings[index].dateTime)}'),
+                            onTap: () {
+                              _showDetailsPanel(bookings[index], widget.user, snapshot.data);
+                            },
                           );
                         }
                         return Center(

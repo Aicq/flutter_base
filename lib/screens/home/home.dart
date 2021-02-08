@@ -42,6 +42,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
+              // The user is passed to these widgets (instead of using provider) as it is needed in initState while also being listened to
               body: user.isAdmin > 0 ? AdminProvider(user: user) : UserCustomer(user: user)
             );
           } else {
