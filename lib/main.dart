@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         theme: ThemeData(
           primarySwatch: Colors.deepPurple,
+          floatingActionButtonTheme: FloatingActionButtonThemeData(backgroundColor: Colors.deepPurple),
           buttonColor: Colors.blueGrey,
           scaffoldBackgroundColor: Colors.grey[100],
         ),

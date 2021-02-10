@@ -5,9 +5,10 @@ class BookingUser {
   String password;
   String firstName;
   String lastName;
+  String imageUrl;
   int isAdmin;
 
-  BookingUser({this.uid, this.email, this.password, this.isAdmin, this.firstName, this.lastName});
+  BookingUser({this.uid, this.email, this.password, this.isAdmin, this.firstName, this.lastName, this.imageUrl});
 
   // These 2 overrides are required to make pre-populating a dropdown work, as even if 2 BookingUser objects
   // have the exact same properties, dart will still equate User1 == User2 to false (which is a check done by

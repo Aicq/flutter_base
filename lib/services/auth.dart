@@ -62,7 +62,7 @@ class AuthService {
 
         print('User: ${user.firstName}');
 
-        await UserService(uid: user.uid).updateUserData(user);
+        await UserService(uid: user.uid).addNewUser(user);
         return true;
       } catch(e) {
         print(e.toString());

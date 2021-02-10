@@ -2,6 +2,7 @@ import 'package:anthonybookings/models/booking.dart';
 import 'package:anthonybookings/models/booking_user.dart';
 import 'package:anthonybookings/services/bookings.service.dart';
 import 'package:anthonybookings/services/user.service.dart';
+import 'package:anthonybookings/shared/booking_time_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -26,14 +27,21 @@ class _DetailsPanelState extends State<DetailsPanel> {
   bool isCustomerEdit = false;
   bool isDescriptionEdit = false;
   bool isAdditionalEdit = false;
-  bool isDateEdit = false;
-  bool isTimeEdit = false;
+  bool isDateTimeEdit = false;
   String editedAdditional;
   String editedDescription;
+  DateTime editedDateTime;
   Future<List<BookingUser>> providerListFuture;
 
   Future<List<BookingUser>> getProviders() async {
     return await UserService().fetchUsers('isAdmin', 1);
+  }
+
+  void updateSelectedDate(DateTime selectedDate) {
+    Navigator.pop(context);
+    setState(() {
+      editedDateTime = selectedDate;
+    });
   }
 
   @override
@@ -49,6 +57,17 @@ class _DetailsPanelState extends State<DetailsPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              RaisedButton(
+                child: Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
               RaisedButton(
                 child: Text(
                   'Cancel Booking',
@@ -85,17 +104,6 @@ class _DetailsPanelState extends State<DetailsPanel> {
                       );
                     }
                   );
-                },
-              ),
-              RaisedButton(
-                child: Text(
-                  'Confirm',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
                 },
               ),
             ],
@@ -192,12 +200,6 @@ class _DetailsPanelState extends State<DetailsPanel> {
                     fontSize: 18.0,
                   ),
                 ),
-//                trailing: IconButton(
-//                  icon: Icon(Icons.edit),
-//                  onPressed: () {
-//                    print('123123123');
-//                  },
-//                ),
               ),
               Divider(),
               ListTile(
@@ -305,41 +307,90 @@ class _DetailsPanelState extends State<DetailsPanel> {
                 ),
               ),
               Divider(),
-              ListTile(
-                title: Text(
-                  'Date:',
-                  style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold
+              Column(
+                children: [
+                  ListTile(
+                    title: isDateTimeEdit && editedDateTime != null ? Text(
+                      'New Date:',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green
+                      ),
+                    ) : Text(
+                      'Date:',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${isDateTimeEdit && editedDateTime != null ? DateFormat('dd/MM/yy').format(editedDateTime)
+                          : DateFormat('dd/MM/yy').format(widget.booking.dateTime)}',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    trailing: isDateTimeEdit ? IconButton(
+                      icon: Icon(Icons.save),
+                      color: Colors.green,
+                      onPressed: () async {
+                        setState(() {
+                          if (editedDateTime != null) {
+                            widget.booking.dateTime = editedDateTime;
+                          }
+                          isDateTimeEdit = false;
+                          // Reset to null to avoid incorrect subtitle text styles being applied if user edits again
+                          editedDateTime = null;
+                        });
+                        await BookingService().addEditBooking(widget.booking);
+                        widget.fetchUserBookings(user.uid);
+                      },
+                    ) : IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        setState(() {
+                          isDateTimeEdit = true;
+                        });
+                        return showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content: SizedBox(
+                                    child: BookingTimeSelector(updateSelectedDate: updateSelectedDate),
+                                    height: MediaQuery.of(context).size.height * 0.8,
+                                    width:  MediaQuery.of(context).size.width * 0.8
+                                ),
+                              );
+                            }
+                        );
+                      },
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  '${DateFormat('dd/MM/yy').format(widget.booking.dateTime)}',
-                  style: TextStyle(
-                      fontSize: 18.0,
+                  ListTile(
+                    title: isDateTimeEdit && editedDateTime != null ? Text(
+                      'New Time:',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green
+                      ),
+                    ) : Text(
+                      'Time:',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${isDateTimeEdit && editedDateTime != null ? DateFormat('kk:mm').format(editedDateTime)
+                          : DateFormat('kk:mm').format(widget.booking.dateTime)}',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
                   ),
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    print('123123123');
-                  },
-                ),
-              ),
-              ListTile(
-                title: Text(
-                  'Time:',
-                  style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold
-                  ),
-                ),
-                subtitle: Text(
-                  '${DateFormat('kk:mm').format(widget.booking.dateTime)}',
-                  style: TextStyle(
-                      fontSize: 18.0,
-                  ),
-                ),
+                ],
               ),
               Divider(),
               ListTile(

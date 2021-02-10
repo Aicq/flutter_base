@@ -2,6 +2,7 @@ import 'package:anthonybookings/models/booking.dart';
 import 'package:anthonybookings/models/booking_user.dart';
 import 'package:anthonybookings/services/bookings.service.dart';
 import 'package:anthonybookings/services/user.service.dart';
+import 'package:anthonybookings/shared/booking_time_selector.dart';
 import 'package:anthonybookings/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -26,49 +27,21 @@ class _BookingFormState extends State<BookingForm> {
   final Curve pageScrollCurve = Curves.linear;
 
   bool isLoading = false;
-  DateTime selectedDate = DateTime.now();
   BookingUser selectedProvider;
   String error = '';
   Future<List<BookingUser>> providerListFuture;
   Booking newBooking;
-  bool isTimeListLoading = false;
-  List<TimeOfDay> availableTimes = bookingIntervalTimes;
 
   Future<List<BookingUser>> getProviders() async {
     return await UserService().fetchUsers('isAdmin', 1);
   }
 
-  // Updates the available appointments list based on the current date selected on the calender
-  void updateAvailableTimes() async {
-
-    List<TimeOfDay> newAvailableTimes = [];
-    isTimeListLoading = true;
-
-    List<Booking> bookingsOnDay = await BookingService().getBookingsOnDay(new DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day
-    ));
-
-    for (var timeValue in bookingIntervalTimes) {
-      bool isAvailable = true;
-
-      for (var booking in bookingsOnDay) {
-        if (TimeOfDay.fromDateTime(booking.dateTime).hour == timeValue.hour
-            && TimeOfDay.fromDateTime(booking.dateTime).minute == timeValue.minute) {
-          isAvailable = false;
-          break;
-        }
-      }
-
-      if (isAvailable) {
-        newAvailableTimes.add(timeValue);
-      }
-    }
-
+  void updateSelectedDate(DateTime selectedDate) {
     setState(() {
-      isTimeListLoading = false;
-      availableTimes = newAvailableTimes;
+      if (_formKeyPage1.currentState.validate()) {
+        newBooking.dateTime = selectedDate;
+        controller.nextPage(duration: Duration(milliseconds: 500), curve: pageScrollCurve);
+      }
     });
   }
 
@@ -76,8 +49,13 @@ class _BookingFormState extends State<BookingForm> {
   void initState() {
     providerListFuture = getProviders();
     newBooking = Booking(customerId: widget.user.uid, description: 'Routine checkup');
-    updateAvailableTimes();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -127,54 +105,7 @@ class _BookingFormState extends State<BookingForm> {
                       },
                     ),
                   ),
-                  CalendarDatePicker(
-                      initialDate: selectedDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(Duration(days: 1000)),
-                      onDateChanged: (date) {
-                        setState(() {
-                          selectedDate = date;
-                          updateAvailableTimes();
-                        });
-                      }
-                  ),
-                  ListTile(
-                    title: Text('Available Bookings - ${DateFormat('dd / MM / yy').format(selectedDate)}'),
-                    tileColor: Colors.lightGreen[200],
-                  ),
-                  isTimeListLoading ? Padding(
-                    padding: const EdgeInsets.only(top: 40.0),
-                    child: SpinKitDualRing(color: Colors.deepPurple),
-                  ) : Expanded(
-                    child: ListView.separated(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: availableTimes.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          title: Text('${availableTimes[index].format(context)}'),
-                          onTap: () {
-                            setState(() {
-                              if (_formKeyPage1.currentState.validate()) {
-                                selectedDate = new DateTime(
-                                  selectedDate.year,
-                                  selectedDate.month,
-                                  selectedDate.day,
-                                  availableTimes[index].hour,
-                                  availableTimes[index].minute,
-                                );
-                                newBooking.dateTime = selectedDate;
-                                controller.nextPage(duration: Duration(milliseconds: 500), curve: pageScrollCurve);
-                              }
-                            });
-                          },
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return Divider();
-                      },
-                    ),
-                  ),
+                  BookingTimeSelector(updateSelectedDate: updateSelectedDate),
                 ],
               ),
             ),
@@ -220,8 +151,8 @@ class _BookingFormState extends State<BookingForm> {
                         trailing: Icon(Icons.calendar_today),
                         subtitle: Text(
                           'Doctor: ${selectedProvider?.firstName} ${selectedProvider?.lastName}\n'
-                          'Date: ${DateFormat('dd / MM / yy').format(selectedDate)}\n'
-                          'Time: ${DateFormat('kk:mm').format(selectedDate)}',
+                          'Date: ${newBooking.dateTime != null ? DateFormat('dd / MM / yy').format(newBooking.dateTime) : ''}\n'
+                          'Time: ${newBooking.dateTime != null ? DateFormat('kk:mm').format(newBooking.dateTime) : ''}',
                           style: TextStyle(
                             height: 2.0
                           )),

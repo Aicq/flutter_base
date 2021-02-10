@@ -19,7 +19,9 @@ class UserCustomer extends StatefulWidget {
 }
 
 class _UserCustomerState extends State<UserCustomer> {
-
+  final imagePageViewController = PageController(
+    initialPage: 0,
+  );
   List<Booking> bookings = [];
   bool isBookingsListLoading = false;
 
@@ -44,6 +46,12 @@ class _UserCustomerState extends State<UserCustomer> {
   }
 
   @override
+  void dispose() {
+    imagePageViewController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     void _showDetailsPanel(Booking booking, BookingUser customer, BookingUser provider) {
@@ -53,6 +61,12 @@ class _UserCustomerState extends State<UserCustomer> {
     }
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => BookingForm(user: widget.user,fetchUserBookings: fetchUserBookings)));
+        },
+        child: Icon(Icons.add),
+      ),
       body: Container(
 //                decoration: BoxDecoration(
 //                  color: Colors.lightGreen[100]
@@ -60,41 +74,68 @@ class _UserCustomerState extends State<UserCustomer> {
         child: Center(
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/medical_bg.jpg'),
-                    fit: BoxFit.cover
-                  )
-                ),
-                child: Column(
+              SizedBox(
+                height: 200.0,
+                child: PageView(
+                  controller: imagePageViewController,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        'Welcome ${widget.user.firstName}!',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage('assets/medical_bg.jpg'),
+                              fit: BoxFit.cover
+                          )
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 80.0, bottom: 30.0),
-                      child: RaisedButton(
-                          key: Key('addBooking'),
-                          color: Colors.indigo[400],
-                          child: Text(
-                            'Make a Booking',
-                            style: TextStyle(
-                              color: Colors.white,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              'Welcome ${widget.user.firstName}!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => BookingForm(user: widget.user,fetchUserBookings: fetchUserBookings)));
-                          }
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 250.0,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage('assets/medical_bg2.jpg'),
+                              fit: BoxFit.cover
+                          )
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              'We are the best on the Coast!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 250.0,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage('assets/medical_bg3.jpg'),
+                              fit: BoxFit.cover
+                          )
                       ),
                     ),
                   ],
@@ -108,44 +149,51 @@ class _UserCustomerState extends State<UserCustomer> {
                 padding: const EdgeInsets.only(top: 40.0),
                 child: SpinKitDualRing(color: Colors.deepPurple),
               ) : Expanded(
-                child: ListView.separated(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: bookings.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return FutureBuilder(
-                      future: getProviderFromBooking(bookings[index]),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                          return ListTile(
-                            // Maybe put provider image here?
-                            leading: CircleAvatar(
-                              backgroundImage: AssetImage('assets/default_user_pic.png'),
-                              radius: 25.0,
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {
+                      fetchUserBookings(widget.user.uid);
+                    });
+                  },
+                  child: ListView.separated(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: bookings.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return FutureBuilder(
+                        future: getProviderFromBooking(bookings[index]),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: snapshot.data.imageUrl != null ? NetworkImage(snapshot.data.imageUrl) :
+                                  AssetImage('assets/default_user_pic.png'),
+                                radius: 25.0,
+                              ),
+                              subtitle: Text('Doctor: ${snapshot.data.firstName}'),
+                              title: Text('${bookings[index].description}'),
+                              trailing: Text('${DateFormat('dd/MM/yy').format(bookings[index].dateTime)}\n${DateFormat('kk:mm').format(bookings[index].dateTime)}'),
+                              onTap: () {
+                                _showDetailsPanel(bookings[index], widget.user, snapshot.data);
+                              },
+                            );
+                          }
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 15.0),
+                              child: SpinKitThreeBounce(
+                                color: Colors.blueGrey,
+                                size: 20.0,
+                              ),
                             ),
-                            subtitle: Text('Doctor: ${snapshot.data.firstName}'),
-                            title: Text('${bookings[index].description}'),
-                            trailing: Text('${DateFormat('dd/MM/yy').format(bookings[index].dateTime)}\n${DateFormat('kk:mm').format(bookings[index].dateTime)}'),
-                            onTap: () {
-                              _showDetailsPanel(bookings[index], widget.user, snapshot.data);
-                            },
                           );
-                        }
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 15.0),
-                            child: SpinKitThreeBounce(
-                              color: Colors.blueGrey,
-                              size: 20.0,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Divider();
-                  },
+                        },
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return Divider();
+                    },
+                  ),
                 ),
               )
             ],

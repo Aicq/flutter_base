@@ -94,9 +94,9 @@ class _AdminProviderState extends State<AdminProvider> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
                         return ListTile(
-                          // Maybe put customer image here?
                           leading: CircleAvatar(
-                            backgroundImage: AssetImage('assets/default_user_pic.png'),
+                            backgroundImage: snapshot.data.imageUrl != null ? NetworkImage(snapshot.data.imageUrl) :
+                              AssetImage('assets/default_user_pic.png'),
                             radius: 25.0,
                           ),
                           subtitle: Text('Patient: ${snapshot.data.firstName}'),

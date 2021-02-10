@@ -9,13 +9,26 @@ class UserService {
   final CollectionReference userCollection = FirebaseFirestore.instance.collection('users');
 
   // Used to update a user
-  Future updateUserData(BookingUser user) async {
+  Future addNewUser(BookingUser user) async {
     return await userCollection.doc(uid).set({
       'uid': uid,
       'email': user.email,
       'password': user.password,
       'firstName': user.firstName,
       'lastName': user.lastName,
+      'imageUrl': user.imageUrl,
+      'isAdmin': user.isAdmin,
+    });
+  }
+
+  // Used to update a user
+  Future updateUserData(BookingUser user) async {
+    return await userCollection.doc(user.uid).update({
+      'email': user.email,
+      'password': user.password,
+      'firstName': user.firstName,
+      'lastName': user.lastName,
+      'imageUrl': user.imageUrl,
       'isAdmin': user.isAdmin,
     });
   }
@@ -27,6 +40,7 @@ class UserService {
       email: snapshot.data()['email'],
       firstName: snapshot.data()['firstName'],
       lastName: snapshot.data()['lastName'],
+      imageUrl: snapshot.data()['imageUrl'],
       isAdmin: snapshot.data()['isAdmin'],
     );
   }
