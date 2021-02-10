@@ -1,6 +1,8 @@
 import 'package:anthonybookings/screens/home/home.dart';
 import 'package:anthonybookings/models/booking_user.dart';
 import 'package:anthonybookings/screens/wrapper.dart';
+import 'package:anthonybookings/shared/themes.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:anthonybookings/services/auth.dart';
@@ -18,14 +20,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamProvider<BookingUser>.value(
       value: AuthService().user,
-      child: MaterialApp(
-        theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
-          floatingActionButtonTheme: FloatingActionButtonThemeData(backgroundColor: Colors.deepPurple),
-          buttonColor: Colors.blueGrey,
-          scaffoldBackgroundColor: Colors.grey[100],
-        ),
-        home: Wrapper(),
+      child: DynamicTheme(
+        defaultBrightness: Brightness.light,
+        data: (brightness) => brightness == Brightness.light ? getLightTheme(brightness) : getDarkTheme(brightness),
+        themedWidgetBuilder: (context, theme) {
+          return MaterialApp(
+            theme: theme,
+            home: Wrapper(),
+          );
+        },
       ),
     );
   }

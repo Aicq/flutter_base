@@ -48,7 +48,7 @@ class _RegisterState extends State<Register> {
                 children: [
                   SizedBox(height: 20.0),
                   TextFormField(
-                    decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                    decoration: textInputDecoration(context).copyWith(hintText: 'Email'),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       return value.isEmpty ? 'Enter an email!' : null;
@@ -61,7 +61,7 @@ class _RegisterState extends State<Register> {
                   ),
                   SizedBox(height: 20.0),
                   TextFormField(
-                    decoration: textInputDecoration.copyWith(hintText: 'First Name'),
+                    decoration: textInputDecoration(context).copyWith(hintText: 'First Name'),
                     keyboardType: TextInputType.name,
                     validator: (value) {
                       return value.isEmpty ? 'Enter an first name!' : null;
@@ -74,7 +74,7 @@ class _RegisterState extends State<Register> {
                   ),
                   SizedBox(height: 20.0),
                   TextFormField(
-                    decoration: textInputDecoration.copyWith(hintText: 'Last Name'),
+                    decoration: textInputDecoration(context).copyWith(hintText: 'Last Name'),
                     keyboardType: TextInputType.name,
                     validator: (value) {
                       return value.isEmpty ? 'Enter an last name!' : null;
@@ -87,7 +87,7 @@ class _RegisterState extends State<Register> {
                   ),
                   SizedBox(height: 20.0),
                   TextFormField(
-                    decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                    decoration: textInputDecoration(context).copyWith(hintText: 'Password'),
                     obscureText: true,
                     validator: (value) {
                       return value.length < 6 ? 'Enter a password 6+ chars long' : null;

@@ -75,11 +75,11 @@ class _AdminProviderState extends State<AdminProvider> {
             ListTile(
               title: Text('Bookings Scheduled'),
               trailing: Text('${DateFormat('dd / MM / yy').format(selectedDate)}'),
-              tileColor: Colors.lightGreen[200],
+              tileColor: Theme.of(context).accentColor,
             ),
             isBookingsListLoading ? Padding(
               padding: const EdgeInsets.only(top: 40.0),
-              child: SpinKitDualRing(color: Colors.deepPurple),
+              child: SpinKitDualRing(color: Theme.of(context).accentColor),
             ) : Expanded(
               child: bookings.length == 0 ? Padding(
                 padding: const EdgeInsets.only(top: 15.0),

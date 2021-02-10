@@ -49,9 +49,8 @@ class _DetailsPanelState extends State<DetailsPanel> {
     final user = Provider.of<BookingUser>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       bottomNavigationBar: Container(
-        color: Colors.deepPurple,
+        color: Colors.grey[700],
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -60,9 +59,6 @@ class _DetailsPanelState extends State<DetailsPanel> {
               RaisedButton(
                 child: Text(
                   'Back',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -71,9 +67,6 @@ class _DetailsPanelState extends State<DetailsPanel> {
               RaisedButton(
                 child: Text(
                   'Cancel Booking',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
                 ),
                 color: Colors.red[300],
                 onPressed: () {

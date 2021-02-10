@@ -1,4 +1,6 @@
 import 'package:anthonybookings/screens/menu/menu_options/user_profile.dart';
+import 'package:anthonybookings/shared/themes.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 
 class SideMenu extends StatelessWidget {
@@ -21,10 +23,17 @@ class SideMenu extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.desktop_windows),
-              title: Text('Change Theme'),
+              leading: Theme.of(context).brightness == Brightness.dark ? Icon(Icons.nights_stay) : Icon(Icons.wb_sunny),
+              title: Text('Toggle Theme'),
               onTap: () {
-                print('yoyo');
+                DynamicTheme.of(context).setBrightness(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Brightness.light
+                        : Brightness.dark);
+                DynamicTheme.of(context).setThemeData(
+                    Theme.of(context).brightness == Brightness.dark
+                    ? getLightTheme(Brightness.light)
+                    : getDarkTheme(Brightness.dark));
               },
             ),
             ListTile(
@@ -65,9 +74,9 @@ class SideMenu extends StatelessWidget {
             Spacer(),
             Container(
                 padding: EdgeInsets.all(10.0),
-                color: Colors.grey[100],
+                color: Theme.of(context).accentColor,
                 child: Text(
-                    'Developed in Flutter by Anthony Crossland',
+                    'Developed in Flutter by Anthony Crossland 2021',
                     textAlign: TextAlign.center
                 )
             )

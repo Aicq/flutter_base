@@ -118,7 +118,7 @@ class _BookingFormState extends State<BookingForm> {
                 child: Column(
                   children: [
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Description'),
+                      decoration: textInputDecoration(context).copyWith(hintText: 'Description'),
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       minLines: 3,
@@ -134,7 +134,7 @@ class _BookingFormState extends State<BookingForm> {
                     ),
                     SizedBox(height: 20.0),
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Additional Details (Allergies, concerns, etc.)'),
+                      decoration: textInputDecoration(context).copyWith(hintText: 'Additional Details (Allergies, concerns, etc.)'),
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       minLines: 3,
@@ -169,7 +169,6 @@ class _BookingFormState extends State<BookingForm> {
                               color: Colors.black,
                             ),
                           ),
-                          color: Colors.deepPurple[100],
                           onPressed: () {
                             controller.previousPage(duration: Duration(milliseconds: 500), curve: pageScrollCurve);
                           },
@@ -177,10 +176,8 @@ class _BookingFormState extends State<BookingForm> {
                         RaisedButton(
                           child: Text(
                             'Book Me In',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
                           ),
+                          color: Theme.of(context).accentColor,
                           onPressed: () async {
                             if (_formKeyPage2.currentState.validate()) {
                               setState(() {

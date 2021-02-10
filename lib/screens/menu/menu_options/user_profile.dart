@@ -108,7 +108,7 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                   Divider(
                     height: 90.0,
-                    color: Colors.grey[800],
+                    color: Theme.of(context).accentColor,
                   ),
                   Text(
                     'NAME',
@@ -121,7 +121,6 @@ class _UserProfileState extends State<UserProfile> {
                   Text(
                     '${user.firstName} ${user.lastName}',
                     style: TextStyle(
-                        color: Colors.deepPurple,
                         letterSpacing: 2.0,
                         fontSize: 28.0,
                         fontWeight: FontWeight.bold),
@@ -138,7 +137,6 @@ class _UserProfileState extends State<UserProfile> {
                   Text(
                     _getUserRole(user.isAdmin),
                     style: TextStyle(
-                        color: Colors.deepPurple,
                         letterSpacing: 2.0,
                         fontSize: 28.0,
                         fontWeight: FontWeight.bold),

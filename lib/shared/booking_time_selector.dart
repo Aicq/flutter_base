@@ -80,11 +80,11 @@ class _BookingTimeSelectorState extends State<BookingTimeSelector> {
           ),
           ListTile(
             title: Text('Available Bookings - ${DateFormat('dd / MM / yy').format(selectedDate)}'),
-            tileColor: Colors.lightGreen[200],
+            tileColor: Theme.of(context).accentColor,
           ),
           isTimeListLoading ? Padding(
             padding: const EdgeInsets.only(top: 40.0),
-            child: SpinKitDualRing(color: Colors.deepPurple),
+            child: SpinKitDualRing(color: Theme.of(context).accentColor),
           ) : Expanded(
             child: ListView.separated(
               scrollDirection: Axis.vertical,

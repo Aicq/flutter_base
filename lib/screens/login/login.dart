@@ -48,7 +48,7 @@ class _RegisterState extends State<Login> {
                 SizedBox(height: 20.0),
                 TextFormField(
                   key: ValueKey('email'),
-                  decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                  decoration: textInputDecoration(context).copyWith(hintText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     return value.isEmpty ? 'Enter an email!' : null;
@@ -63,7 +63,7 @@ class _RegisterState extends State<Login> {
                 SizedBox(height: 20.0),
                 TextFormField(
                   key: ValueKey('password'),
-                  decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                  decoration: textInputDecoration(context).copyWith(hintText: 'Password'),
                   obscureText: true,
                   validator: (value) {
                     return value.length < 6 ? 'Enter a password 6+ chars long' : null;

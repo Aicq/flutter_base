@@ -142,12 +142,12 @@ class _UserCustomerState extends State<UserCustomer> {
                 ),
               ),
               ListTile(
-                title: Text('Your Bookings'),
-                tileColor: Colors.lightGreen[200],
+                title: Text('Your Bookings', style: TextStyle(color: Colors.white)),
+                tileColor: Theme.of(context).accentColor,
               ),
               isBookingsListLoading ? Padding(
                 padding: const EdgeInsets.only(top: 40.0),
-                child: SpinKitDualRing(color: Colors.deepPurple),
+                child: SpinKitDualRing(color: Theme.of(context).accentColor),
               ) : Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {
