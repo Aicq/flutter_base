@@ -1,9 +1,25 @@
+import 'package:anthonybookings/screens/menu/menu_options/about_us.dart';
+import 'package:anthonybookings/screens/menu/menu_options/bug_report.dart';
+import 'package:anthonybookings/screens/menu/menu_options/contact_us.dart';
+import 'package:anthonybookings/screens/menu/menu_options/faq.dart';
 import 'package:anthonybookings/screens/menu/menu_options/user_profile.dart';
 import 'package:anthonybookings/shared/themes.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SideMenu extends StatelessWidget {
+
+  // Open google maps (in app if user has it) for given location
+  void _launchMapsUrl() async {
+    final url = 'https://www.google.com/maps/place/In+The+Code/@-28.001455,153.4115303,17z/data=!3m1!4b1!4m5!3m4!1s0x6b91034395cf589d:0x57f608825f825c73!8m2!3d-28.001455!4d153.413719';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
@@ -40,35 +56,35 @@ class SideMenu extends StatelessWidget {
               leading: Icon(Icons.info),
               title: Text('FAQ'),
               onTap: () {
-                print('yoyo');
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Faq()));
               },
             ),
             ListTile(
               leading: Icon(Icons.work),
               title: Text('About Us'),
               onTap: () {
-                print('yoyo');
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutUs()));
               },
             ),
             ListTile(
               leading: Icon(Icons.email),
               title: Text('Contact Us'),
               onTap: () {
-                print('yoyo');
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ContactUs()));
               },
             ),
             ListTile(
               leading: Icon(Icons.location_on),
               title: Text('Our Location'),
               onTap: () {
-                print('yoyo');
+                _launchMapsUrl();
               },
             ),
             ListTile(
               leading: Icon(Icons.bug_report),
               title: Text('Report a Bug'),
               onTap: () {
-                print('yoyo');
+                Navigator.push(context, MaterialPageRoute(builder: (context) => BugReport()));
               },
             ),
             Spacer(),
